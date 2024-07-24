@@ -1,0 +1,12 @@
+data:
+  raw_dir: "data/raw/"
+  processed_dir: "data/processed/"
+  test_dir: "data/test/"
+
+model:
+  save_dir: "models/checkpoints/"
+
+training:
+  epochs: 10
+  batch_size: 32
+  learning_rate: 0.001
