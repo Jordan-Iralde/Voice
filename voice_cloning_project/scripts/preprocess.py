@@ -1,24 +1,41 @@
-import librosa
+from pydub import AudioSegment
 import os
+from tkinter import Tk
+from tkinter.filedialog import askopenfilename
 import numpy as np
 
-def preprocess_audio(file_path, save_path):
-    y, sr = librosa.load(file_path, sr=None)  # Cargar el archivo de audio
-    mel_spec = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128)  # Generar el espectrograma Mel
-    log_mel_spec = librosa.power_to_db(mel_spec, ref=np.max)  # Convertir a escala logarítmica
-    np.save(save_path, log_mel_spec)  # Guardar el espectrograma Mel como archivo .npy
+def select_audio_file():
+    """Permite al usuario seleccionar un archivo de audio."""
+    Tk().withdraw()
+    return askopenfilename(title="Selecciona un archivo de audio", filetypes=[("Archivos de Audio", "*.wav;*.mp3")])
 
-data_dir = r"voice_cloning_project\data\raw"
-processed_dir = r"voice_cloning_project\data\processed"
+def convert_audio_to_wav(audio_path, wav_path):
+    """Convierte un archivo de audio a formato WAV usando pydub."""
+    try:
+        audio = AudioSegment.from_file(audio_path)
+        audio.export(wav_path, format="wav")
+    except Exception as e:
+        print(f"Error al convertir el audio: {e}")
 
-if not os.path.exists(processed_dir):
-    os.makedirs(processed_dir)
+def process_audio(audio_path):
+    """Procesa el archivo de audio para extraer características."""
+    try:
+        audio = AudioSegment.from_file(audio_path)
+        samples = np.array(audio.get_array_of_samples())
+        # Aquí puedes agregar la extracción de características
+        print(f"Audio procesado con {len(samples)} muestras.")
+    except Exception as e:
+        print(f"Error al procesar el audio: {e}")
 
-for file_name in os.listdir(data_dir):
-    if file_name.endswith(".wav"):
-        file_path = os.path.join(data_dir, file_name)
-        save_path = os.path.join(processed_dir, file_name.replace('.wav', '.npy'))
-        preprocess_audio(file_path, save_path)
+def main():
+    input_audio_path = select_audio_file()
+    if input_audio_path:
+        wav_path = "processed_audio.wav"
+        convert_audio_to_wav(input_audio_path, wav_path)
+        process_audio(wav_path)
+        print("Procesamiento completado.")
+    else:
+        print("No se seleccionó ningún archivo.")
 
-
-
+if __name__ == "__main__":
+    main()
